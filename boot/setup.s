@@ -113,7 +113,7 @@ three_get_phys_mem:
     add edx,0x100000 
     mov [Physical_memory_capacity],edx    
     jmp get_mem_ok
-    
+
     ; 三种方法都无法获取内存容量，计算机挂起
 get_mem_error:                          
     ; 显示读取内存失败msg信息：并且挂起计算机
@@ -123,7 +123,7 @@ get_mem_error:
     mov bx,0x001f
     mov dx,0x1700
     int 0x10 
-    jmp $   
+    hlt  
 
 get_mem_ok:                             ; 读取物理内存OK
     ; 显示msg信息：表示准备进入保护模式
@@ -173,4 +173,86 @@ protect_mode_start:
     mov byte [fs:180] ,'d'
     mov byte [fs:182] ,'e'
     mov byte [fs:184] ,'!'
+    
+    ; 准备开启分页模式
+    call init_pages   ;创建页表
+    mov ebx,[PTR_GDT + 2]                   ; 更新gdt_ptr，更新显卡虚拟地址，更新栈指针
+    or  dword [ebx + 0x18 + 4],0xc0000000
+    add dword [PTR_GDT + 2],0xc0000000
+    add esp,0xc0000000
+    ; 页目录地址赋值给cr3
+    mov eax,PAGES_DIR_TABLE_BASE_ADDR
+    mov cr3,eax
+    ; 打开cr0的pg位
+    mov eax,cr0
+    or  eax,0x80000000
+    mov cr0,eax
+    ; 重新加载GDTR
+    lgdt [PTR_GDT]
+    ; 到此为止，已经进入了虚拟地址的世界，程序访问3～4G地址时，便是访问内核空间，
+    mov byte [fs:320] ,'V'
+    mov byte [fs:322] ,'i'
+    mov byte [fs:324] ,'r'
+    mov byte [fs:326] ,'t'
+    mov byte [fs:328] ,'u'
+    mov byte [fs:330] ,'a'
+    mov byte [fs:332] ,'l'
+    mov byte [fs:334] ,'!'
     jmp $
+
+
+; 初始化页目录表：创建了内核页目录，创建了低1M字节的页表项，让页目录第1项和768项指向了第一个页表，
+            ;  其中第一个页表的低1M空间也对应了物理地址低1M字节
+init_pages:                            
+    mov ecx,4096
+    mov esi,0
+clear_pages:                           ; 清除页目录表(4k字节大小，对应1k个页表)
+    mov byte [PAGES_DIR_TABLE_BASE_ADDR + esi],0
+    inc esi
+    loop clear_pages
+create_pde:                            ; 创建页目录表项
+    mov eax,PAGES_DIR_TABLE_BASE_ADDR  ; 将页目录首地址赋值给eax
+    add eax,0x1000                     ; 计算得到第1项页表的地址
+    mov ebx,eax                        ; 保存第1项页表的地址到ebx
+    or  eax,PG_RW_W | PG_US_U | PG_P   ; 设置第一项页目录项属性 
+    ; 下面两句代码的意思是将页目录的第1项和第768项同时指向第一个页表，因为第一个页表需要对应内存低4M字节
+    mov [PAGES_DIR_TABLE_BASE_ADDR + 0x0],eax   ;写入第一项页表到第一项页目录项中
+    mov [PAGES_DIR_TABLE_BASE_ADDR + 0xc00],eax ;写入第一项页表到第768项页目录项中
+    sub eax,0x1000
+    mov [PAGES_DIR_TABLE_BASE_ADDR + 4092],eax  ;页目录表最后一项指向页目录表所在地址
+
+    ; 创建第一个页表项(填充了1M)
+    mov ecx,256
+    mov esi,0
+    mov edx,PG_RW_W | PG_US_U | PG_P
+create_pte:
+    mov [ebx+esi*4],edx
+    inc esi
+    add edx,4096
+    loop create_pte
+
+    ; 重建内核其他页表的页目录项
+    mov eax,PAGES_DIR_TABLE_BASE_ADDR
+    add eax,0x2000
+    or  eax,PG_RW_W | PG_US_U | PG_P
+    mov ebx,PAGES_DIR_TABLE_BASE_ADDR
+    mov ecx,254
+    mov esi,769
+create_kernel_pde:                              ; 创建内核的相应页目录表对应从第二个页表开始的页表项（254个页表，一个页表4M，一共1016M字节空间）
+    mov [ebx + esi*4],eax                       ; 剩下8M空间分别是2个页表，一个页表指向了页目录表，一个指向了低4M字节，所以现在相当于是虚拟地址
+    add eax,4096                                ; 高1G的空间是内核空间，剩下3G的空间是用户空间，但是仅仅是指虚拟空间，由于没有填写页表项，所以目
+    inc esi                                     ; 前对应物理地址可以是任何地址。
+    loop create_kernel_pde
+    ret
+
+
+
+
+
+
+
+
+
+
+
+
