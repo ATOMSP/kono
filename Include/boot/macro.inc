@@ -63,3 +63,10 @@ PG_RW_R equ 00b
 PG_RW_W equ 10b
 PG_US_S equ 000b
 PG_US_U equ 100b
+
+
+; 内核相关参数
+KERNEL_START_SECTOR equ 9     ;内核所在扇区
+KERNEL_BASE_ADDR equ 0x70000  ;加载内核bin到此物理地址
+KERNEL_SECTOR_NUM equ 200     ;内核读入扇区数
+KERNEL_ENTRY_ADDR  equ 0xc0001500 ;内核执行入口地址

@@ -174,6 +174,16 @@ protect_mode_start:
     mov byte [fs:182] ,'e'
     mov byte [fs:184] ,'!'
     
+;---------------------------------------加载内核&初始化内核----------------------------------
+    mov eax,KERNEL_START_SECTOR
+    mov ebx,KERNEL_BASE_ADDR
+    mov ecx,KERNEL_SECTOR_NUM
+    call read_disk_mode_in_32           ;读取内核bin文件
+
+
+
+;---------------------------------------打开分页--------------------------------------------
+
     ; 准备开启分页模式
     call init_pages   ;创建页表
     mov ebx,[PTR_GDT + 2]                   ; 更新gdt_ptr，更新显卡虚拟地址，更新栈指针
@@ -245,6 +255,76 @@ create_kernel_pde:                              ; 创建内核的相应页目录
     loop create_kernel_pde
     ret
 
+
+;读取内核bin文件
+read_disk_mode_in_32:
+	; 保存eax和cx的参数
+	mov esi,eax
+    mov di,cx
+    ; 写硬盘控制器的0x1f2端口cl寄存器的值，表示要加载的扇区个数
+	mov dx,0x01f2
+	mov al,cl
+	out dx,al
+	; 下面开始写入lba模式下的扇区编号，这里是第2个扇区
+	mov eax,esi
+	mov dx,0x01f3
+	out dx,al
+
+	mov cl,8
+	shr eax,cl
+	mov dx,0x01f4
+	out dx,al
+
+    mov dx,0x01f5
+	shr eax,cl
+	out dx,al
+	 
+	shr eax,cl
+	and al,0x0f
+	or  al,0xe0
+	mov dx,0x01f6
+	out dx,al
+	; 写入命令寄存器0x20，表示需要进行读硬盘操作
+	mov dx,0x01f7
+	mov al,0x20
+	out dx,al
+	; 等待硬盘准备好
+.not_ready:
+	nop
+	in al,dx
+	and al,0x88
+	cmp al,0x08
+	jnz .not_ready
+	; 进行读取硬盘数据到指定位置0x900
+	mov ax,di
+	mov dx,256
+	mul dx
+	mov cx,ax
+	mov dx,0x01f0
+.reading_data:
+	in ax,dx
+	mov [ebx],ax
+	add ebx,2
+	loop .reading_data
+	ret    
+
+
+;--------内存拷贝函数--------
+;参数：desc , src , size
+;返回值：无
+;--------------------------
+mem_cpy:
+    cld  ;清除DF标志位
+    push ebp
+    mov  ebp,esp
+    push ecx
+    mov edi, [ebp + 8]
+    mov esi, [ebp + 12]
+    mov ecx, [ebp + 16]
+    rep movsb
+    pop ecx
+    pop ebp
+    ret
 
 
 
