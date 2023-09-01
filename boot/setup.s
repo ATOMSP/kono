@@ -36,7 +36,7 @@ STACK_TOP_ADDR equ SETUP_BASE_ADDR
 ; 准备进入保护模式
 setup_start:
     mov sp,STACK_TOP_ADDR
-    ; 获取内存分布（实模式）：后续进入保护模式内核需要
+    ; 获取内存分布（实模式）：后续进入保护模式内核需要(三种方法都使用)
 
     ; 显示msg信息：表示准备进入保护模式
     mov bp,setup_string_msg
