@@ -29,14 +29,56 @@ STACK_TOP_ADDR equ SETUP_BASE_ADDR
     SELECTOR_VIDEO equ (0x0003 << 3)+TI_GDT+RPL_0 ;显卡段选择子
 
     PTR_GDT   dw GDT_LIMIT
-              dd GDT_BASE   ; GDTR指针变量
+              dd GDT_BASE                         ; GDTR指针变量
+
+    Physical_memory_capacity dd 0                 ; 物理内存容量0xb00
+    Ards_buff dd 0                                ; Ards结构体缓存
+              dd 0
+              dd 0
+              dd 0
+              dd 0
+    Ards_cnt  dw 0                                ; Ards结构体返回个数
 
     setup_string_msg db 'ready in protect mode...' ; msg信息打印
-
+    two_get_mem_string db 'get mem failed'         ; 
 ; 准备进入保护模式
 setup_start:
     mov sp,STACK_TOP_ADDR
     ; 获取内存分布（实模式）：后续进入保护模式内核需要(三种方法都使用)
+    ; 1.使用bios的中断0x15子功能0xE820获取物理内存
+    sub ebx,ebx
+    mov di,Ards_buff
+    mov edx,SIGNATURE_MARKUP
+one_get_phys_mem:
+    mov eax,0xe820                  
+    mov ecx,ARDS_SIZE
+    int 0x15
+    jc  two_get_phys_mem                ; 调用无错误执行下面代码
+    mov eax,[di]                        ; 保存获取到的最新内存容量
+    add eax,[di + 8]   
+    mov ecx,[Physical_memory_capacity]  ; 保存当前最大物理内存到ecx
+    cmp eax,ecx                         ; 比较最新值与前一次的值
+    jg  reg_to_mem                      ; 最新值更大则更新物理内存容量值，否则判断是否ards结构体全部获取,以此选择结束或者进入下一次获取
+    inc word [Ards_cnt]
+    jmp is_over
+reg_to_mem:              
+    mov [Physical_memory_capacity],eax  ; 如果最新值大于最大值则保存到Physical_memory_capacity中
+    inc word [Ards_cnt]
+is_over:                                ; 判断是否为最后一个结构体
+    cmp ebx,0
+    jnz one_get_phys_mem
+    jmp get_mem_ok
+    ; 2.使用bios的中断0x15子功能0xE801获取物理内存
+two_get_phys_mem:
+    mov bp,two_get_mem_string
+    mov cx,14
+    mov ax,0x1301
+    mov bx,0x001f
+    mov dx,0x1700
+    int 0x10    
+    jmp $
+
+get_mem_ok:                             ; 读取物理内存OK
 
     ; 显示msg信息：表示准备进入保护模式
     mov bp,setup_string_msg

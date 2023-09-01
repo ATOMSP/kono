@@ -51,4 +51,6 @@ RPL_3 equ 11b
 TI_GDT equ 000b ;段选择子请求的段描述符在GDT
 TI_LDT equ 100b ;段选择子请求的段描述符在LDT
 
-
+; 获取物理内存参数
+ARDS_SIZE equ 20                    ; ards结构体大小
+SIGNATURE_MARKUP equ 0x534d4150     ; 签名标识
