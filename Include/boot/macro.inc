@@ -66,7 +66,17 @@ PG_US_U equ 100b
 
 
 ; 内核相关参数
-KERNEL_START_SECTOR equ 9     ;内核所在扇区
-KERNEL_BASE_ADDR equ 0x70000  ;加载内核bin到此物理地址
-KERNEL_SECTOR_NUM equ 200     ;内核读入扇区数
-KERNEL_ENTRY_ADDR  equ 0xc0001500 ;内核执行入口地址
+KERNEL_START_SECTOR equ 9           ;内核所在扇区
+KERNEL_BASE_ADDR    equ 0x70000     ;加载内核bin到此物理地址
+KERNEL_SECTOR_NUM   equ 200         ;内核读入扇区数
+KERNEL_ENTRY_ADDR   equ 0xc0001500  ;内核执行入口地址
+
+ELF_PROGRAM_HEAD_SIZE_OFFSET    equ  42     ; elf文件格式中存放程序头的尺寸的数据的相对文件起始字节的偏移量
+ELF_PROGRAM_HEAD_NUM_OFFSET     equ  44     ; elf文件格式中存放程序头的数量的数据的相对文件起始字节的偏移量
+ELF_PROGRAM_HEAD_OFFSET_OFFSET  equ  28     ; elf文件格式中存放程序头的偏移的数据的相对文件起始字节的偏移量
+SEGMENT_SIZE_PT_OFFSET        equ 16      ; 段的尺寸数据在程序头表中的偏移量
+SEGMENT_OFFSET_PT_OFFSET      equ 4       ; 段在程序头表数据的偏移
+SEGMENT_IN_MEM_ADDR_PT_OFFSET equ 8       ; 段在内存的目标地址数据在程序头表中的偏移
+
+PT_NULL equ 0                               ; 段无效
+

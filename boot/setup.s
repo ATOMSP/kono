@@ -90,12 +90,10 @@ two_get_phys_mem:
     or  edx,eax
     add edx,0x100000
     mov esi,edx         
-
     sub eax,eax
     mov ax,bx
     mov ecx,0x10000
     mul ecx
-    
     add esi,eax
     mov [Physical_memory_capacity],esi  ; 得到的内存容量放置到Physical_memory_capacity
     jmp get_mem_ok
@@ -148,7 +146,7 @@ get_mem_ok:                             ; 读取物理内存OK
     ; 刷新流水线
     jmp SELECTOR_CODE:protect_mode_start
 
-[bits 32]
+[bits 32];以32位编址
 protect_mode_start:
     ; 初始化段寄存器
     mov ax,SELECTOR_DATA
@@ -174,13 +172,11 @@ protect_mode_start:
     mov byte [fs:182] ,'e'
     mov byte [fs:184] ,'!'
     
-;---------------------------------------加载内核&初始化内核----------------------------------
+;---------------------------------------加载内核----------------------------------
     mov eax,KERNEL_START_SECTOR
     mov ebx,KERNEL_BASE_ADDR
     mov ecx,KERNEL_SECTOR_NUM
     call read_disk_mode_in_32           ;读取内核bin文件
-
-
 
 ;---------------------------------------打开分页--------------------------------------------
 
@@ -199,6 +195,10 @@ protect_mode_start:
     mov cr0,eax
     ; 重新加载GDTR
     lgdt [PTR_GDT]
+    ; 刷新流水线
+    jmp SELECTOR_CODE:enter_kernel
+
+enter_kernel:
     ; 到此为止，已经进入了虚拟地址的世界，程序访问3～4G地址时，便是访问内核空间，
     mov byte [fs:320] ,'V'
     mov byte [fs:322] ,'i'
@@ -208,7 +208,11 @@ protect_mode_start:
     mov byte [fs:330] ,'a'
     mov byte [fs:332] ,'l'
     mov byte [fs:334] ,'!'
-    jmp $
+
+;---------------------------------------初始化内核---------------------------------- 
+    call kernel_init                    ; 初始化内核后，内核代码已经放置到了设定的程序虚拟地址处
+    mov  esp,0xc009f000                 ; 更新栈指针
+    jmp  KERNEL_ENTRY_ADDR              ; 跳转至内核代码运行（进入c语言的世界）
 
 
 ; 初始化页目录表：创建了内核页目录，创建了低1M字节的页表项，让页目录第1项和768项指向了第一个页表，
@@ -230,7 +234,6 @@ create_pde:                            ; 创建页目录表项
     mov [PAGES_DIR_TABLE_BASE_ADDR + 0xc00],eax ;写入第一项页表到第768项页目录项中
     sub eax,0x1000
     mov [PAGES_DIR_TABLE_BASE_ADDR + 4092],eax  ;页目录表最后一项指向页目录表所在地址
-
     ; 创建第一个页表项(填充了1M)
     mov ecx,256
     mov esi,0
@@ -240,7 +243,6 @@ create_pte:
     inc esi
     add edx,4096
     loop create_pte
-
     ; 重建内核其他页表的页目录项
     mov eax,PAGES_DIR_TABLE_BASE_ADDR
     add eax,0x2000
@@ -310,7 +312,7 @@ read_disk_mode_in_32:
 
 
 ;--------内存拷贝函数--------
-;参数：desc , src , size
+;参数：（desc , src , size）
 ;返回值：无
 ;--------------------------
 mem_cpy:
@@ -326,13 +328,30 @@ mem_cpy:
     pop ebp
     ret
 
+; 内核初始化函数
+kernel_init:
+    sub eax,eax                                 ; 清除寄存器，用来放置下面的内容
+    sub ebx,ebx                                 ; 记录程序头表的位置
+    sub ecx,ecx                                 ; 记录程序头表中程序头的数量
+    sub edx,edx                                 ; 记录程序头表中程序头的尺寸
+    
+    mov dx,[KERNEL_BASE_ADDR + ELF_PROGRAM_HEAD_SIZE_OFFSET]   ; 获取程序头表中程序头的尺寸
+    mov cx,[KERNEL_BASE_ADDR + ELF_PROGRAM_HEAD_NUM_OFFSET]    ; 获取程序头表中程序头的数量
+    mov ebx,[KERNEL_BASE_ADDR + ELF_PROGRAM_HEAD_OFFSET_OFFSET] ; 获取程序头表相对文件头的偏移
+    add ebx,KERNEL_BASE_ADDR                                    ; 根据获取到的程序头表偏移量加上起始地址就可以获取物理上程序头表的位置
 
-
-
-
-
-
-
-
-
-
+each_segment:
+    cmp byte [ebx], PT_NULL                                     ; 检查程序头表中每一段是否为无效段
+    je  elf_ptnull
+    ; 为可加载段的话，执行内存拷贝
+    push dword [ebx + SEGMENT_SIZE_PT_OFFSET]                   ; 得到段的尺寸
+    mov  eax,[ebx + SEGMENT_OFFSET_PT_OFFSET]                   ; 得到段在文件中的偏移
+    add  eax,KERNEL_BASE_ADDR                                   ; 得到段在文件的真实编址
+    push eax
+    push dword [ebx + SEGMENT_IN_MEM_ADDR_PT_OFFSET]            ; 压入目标拷贝虚拟地址
+    call mem_cpy
+    add  esp,12                                                 ; 将参数出栈
+elf_ptnull:
+    add ebx,edx
+    loop each_segment
+    ret
