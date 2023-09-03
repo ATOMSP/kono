@@ -1,16 +1,10 @@
-
-
-void memcpy(char* desc,const char* src,unsigned int size)
-{
-    while (size--)
-    {
-        *(desc++) = *(src++);
-    }
-}
+#include "../Include/kernal/print.h"
 
 
 int main()
 {
+    const char* str = "Hello Kernel!";
+    s_putstr(str);
     while (1);
     return 0;
 }
