@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.s": "nasm",
+        "macro.h": "c",
+        "stdint.h": "c",
+        "init.h": "c",
+        "interrupt.h": "c",
+        "io.h": "c"
+    }
+}

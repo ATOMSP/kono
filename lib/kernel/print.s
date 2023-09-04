@@ -12,7 +12,7 @@ SECTION .text
 global s_putchar
 
 ; ---功能：打印单个字符（汇编实现）---
-;
+;   输入：单个字符（c语言调用）
 ; -------------------------------
 s_putchar:
     pushad                          ; 备份32寄存器环境
@@ -80,7 +80,7 @@ roll_screen:
     rep movsd                       ; 四字节搬运
     ; 填充最后一行为0
     mov ebx,3840
-    sub ecx,80
+    mov ecx,80
 clear_last_line:
     mov word [fs:ebx],0x0700
     add ebx,2
@@ -104,7 +104,9 @@ put_char_done:
     popad
     ret
 
-; 打印字符串
+; ---功能：打印字符串（汇编实现）-----
+;   输入：字符串地址（c语言调用）
+; -------------------------------
 global s_putstr
 
 s_putstr:   
@@ -126,7 +128,9 @@ is_str_end:
     pop  ebx
     ret
 
-; 打印数字
+; ---功能：打印整形数字（汇编实现）---
+;   输入：数字（c语言调用）
+; -------------------------------
 global s_putnum
 
 s_putnum:
@@ -137,25 +141,46 @@ s_putnum:
     mov edi,7
     mov ecx,8
     mov ebx,putnum_buff
- 16base_4bits:
+loop_base_4bits:
     and edx,0x0000000f
     cmp edx,9
     jg  is_a2f
     add edx,'0'
-    jmp store
+    jmp to_store
 is_a2f:
     sub edx,10
     add edx,'A'
-store:
+to_store:
     mov [ebx + edi],dl
     dec edi
     shr eax,4
     mov edx,eax
-    loop 16base_4bits
-
-
-
-
+    loop loop_base_4bits
+ready_to_print:
+    inc edi
+skip_prefix_0:
+    cmp edi,8
+    je  full_0
+go_on_skip:
+    mov cl,[ebx + edi]
+    inc edi
+    cmp cl,'0'
+    je  skip_prefix_0
+    dec edi
+    jmp put_each_char
+full_0:
+    mov cl,'0'
+put_each_char:
+    push ecx
+    call s_putchar
+    add  esp,4
+    inc  edi
+    mov cl,[ebx + edi]
+    cmp  edi,8
+    jl  put_each_char
+    popad
+    ret
+; -------------------------------------------------数据区域----------------------------------------
 SECTION .data
     putnum_buff dq 0                ; 定义缓存
 

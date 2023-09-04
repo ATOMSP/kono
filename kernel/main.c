@@ -1,12 +1,17 @@
-#include "../Include/kernal/print.h"
+#include "../Include/lib/print.h"
+#include "../Include/kernel/init.h"
+
+
+
+
 
 
 int main()
 {
-    const char* str = "Hello Kernel!";
-    s_putstr(str);
+    init_dev();
+    asm volatile("sti");
     while (1);
-    return 0;
+    return 0;                                                                                                                
 }
 
 
