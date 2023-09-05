@@ -14,7 +14,7 @@ CFLAGS = -Wall $(CLIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototyp
 LDFLAGS = -Ttext $(C_ENTER_ADDR) -e main -Map $(BUILE_DIR)/kernel.map -m elf_i386
 ISDEBUG = -D NO_DEBUG # 是否打开debug
 # 内核目标文件
-OBJS = $(BUILE_DIR)/main.o $(BUILE_DIR)/init.o  $(BUILE_DIR)/debug.o \
+OBJS = $(BUILE_DIR)/main.o $(BUILE_DIR)/init.o  $(BUILE_DIR)/string.o $(BUILE_DIR)/debug.o \
 	   $(BUILE_DIR)/interrupt.o  $(BUILE_DIR)/s_interrupt.o   $(BUILE_DIR)/print.o $
 
 
@@ -33,6 +33,8 @@ $(BUILE_DIR)/init.o:kernel/init.c
 $(BUILE_DIR)/interrupt.o:kernel/interrupt.c
 	$(CC) $(CFLAGS) $(CLIB) -o $@ $<
 $(BUILE_DIR)/debug.o:kernel/debug.c
+	$(CC) $(CFLAGS) $(CLIB) -o $@ $<
+$(BUILE_DIR)/string.o:lib/kernel/string.c
 	$(CC) $(CFLAGS) $(CLIB) -o $@ $<
 # 编译内核汇编代码
 $(BUILE_DIR)/print.o:lib/kernel/print.s
