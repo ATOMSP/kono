@@ -4,6 +4,8 @@
 %define ZERO       push 0           ; 则不进行操作，否则压入0
 
 extern s_putstr                    ; 引入外部打印字符函数
+extern Int_callback_table          ; 中断服务函数地址数组
+
 
 SECTION .data
     int_msg db "Interrupt coming!",0x0a,0x00
@@ -16,16 +18,30 @@ int_entry_table:                        ; 组织中断服务表
 SECTION .text
 int%1_callback:
     %2                                  ; 对于cpu是否压栈错误码，不压的话就压0，压栈的话cpu这里就空转一下
-    push int_msg
-    call s_putstr
-    add  esp,4
+    push ds                             ; 汇编跳到c，会破坏环境
+    push es
+    push fs
+    push gs
+    pushad
+    ; push int_msg                      ; 测试使用过
+    ; call s_putstr
+    ; add  esp,4
 
     mov al,0x20
     out 0xa0,al                         ; 从片发送EOI
     out 0x20,al                         ; 主片发送EOI
 
+    push %1                             ; 压入中断向量号
+    call [Int_callback_table + %1 * 4]  ; 调用c中断服务函数
+    add esp,4                           ; 跳过参数
+    popad
+    pop gs
+    pop fs
+    pop es
+    pop ds
     add esp,4                           ; 不管有没有错误码，都要设置栈指针，因为人为对齐了
-    iret                                ; 中断返回
+    iretd                               ; 32位中断返回
+
 SECTION .data
     dd int%1_callback                   ; 存储中断入口程序地址32位
 %endmacro
