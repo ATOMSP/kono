@@ -15,12 +15,33 @@ typedef void* Int_Handler_Typedef;
 #define PIC_S_CTRL  0xa0        // 从片控制端口
 #define PIC_S_DATA  0xa1        // 从片数据端口
 
-
+//中断状态枚举
+enum int_state{
+    INT_OFF,
+    INT_ON
+};
 
 /**
  * 中断初始化
 */
 void int_init(void);
+/**
+ * 获取中断状态：INT_ON or INT_OFF
+*/
+enum int_state Int_Get_State(void);
+/**
+ * 设置中断状态：INT_ON or INT_OFF
+*/
+enum int_state Int_Set_State(enum int_state state);
+/**
+ * 禁止中断
+*/
+enum int_state Int_Disable(void);
+/**
+ * 开启中断
+*/
+enum int_state Int_Enable(void);
+
 
 
 #ifdef __cplusplus

@@ -134,12 +134,61 @@ void int_init(void)
     s_putstr("init_idt OK\n");
 }
 
+/*------------------------中断相关操作----------------------------*/
+#define EFLAGS_IF 0x00000200
+#define GET_EFLAGS(EFLAGS_VAR) asm volatile("pushfl; \
+                                             popl %0" \
+                                             :"=g"(EFLAGS_VAR));
+
+/**
+ * 开启中断
+*/
+enum int_state Int_Enable(void)
+{
+    enum int_state pre;
+    if(INT_ON == Int_Get_State()){
+        pre = INT_ON;
+    }else{
+        pre = INT_OFF;
+        asm volatile("sti");
+    }
+    return pre;
+}
+
+/**
+ * 禁止中断
+*/
+enum int_state Int_Disable(void)
+{
+    enum int_state pre;
+    if(INT_OFF == Int_Get_State()){
+        pre = INT_OFF;
+    }else{
+        pre = INT_ON;
+        asm volatile("cli":::"memory"); //关闭中断用到内存操作，因为要修改if位
+    }
+    return pre;    
+}
+
+/**
+ * 设置中断状态：INT_ON or INT_OFF
+*/
+enum int_state Int_Set_State(enum int_state state)
+{
+    return (state & INT_ON) ? Int_Enable() : Int_Disable();
+}
 
 
 
-
-
-
+/**
+ * 获取中断状态：INT_ON or INT_OFF
+*/
+enum int_state Int_Get_State(void)
+{
+    uint32_t cur = 0;
+    GET_EFLAGS(cur);
+    return (cur & EFLAGS_IF) ? INT_ON : INT_OFF;
+}
 
 
 
