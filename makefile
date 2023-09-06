@@ -8,12 +8,14 @@ CC  = gcc-4.4
 LD  = ld
 # 构建参数宏定义
 ASLIB = -I Include/boot
-CLIB = -I Include/kernel -I Include/lib
+#CLIB = -I Include/kernel -I Include/lib
+CLIB = -I Include/
 ASFLAGS = -f elf# 汇编文件编译成elf格式
 CFLAGS = -Wall $(CLIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32
 LDFLAGS = -Ttext $(C_ENTER_ADDR) -e main -Map $(BUILE_DIR)/kernel.map -m elf_i386
 ISDEBUG = -D NO_DEBUG # 是否打开debug
-# 内核目标文件
+
+# 内核目标文件: 添加c源文件时，需要修改
 OBJS = $(BUILE_DIR)/main.o $(BUILE_DIR)/init.o  $(BUILE_DIR)/string.o $(BUILE_DIR)/debug.o \
 	   $(BUILE_DIR)/interrupt.o  $(BUILE_DIR)/s_interrupt.o   $(BUILE_DIR)/print.o $
 
@@ -25,7 +27,7 @@ $(BUILE_DIR)/bootload.o:boot/bootload.s
 $(BUILE_DIR)/setup.o:boot/setup.s	 
 	$(ASM) $(ASLIB) -o $(BUILE_DIR)/setup.o boot/setup.s	 
 
-# 编译内核C语言代码
+# 编译内核C语言代码: 添加c源文件时，需要修改
 $(BUILE_DIR)/main.o:kernel/main.c
 	$(CC) $(CFLAGS) $(CLIB) -o $@ $<
 $(BUILE_DIR)/init.o:kernel/init.c

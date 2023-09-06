@@ -1,5 +1,5 @@
-#include "../Include/lib/print.h"
-#include "../Include/kernel/interrupt.h"
+#include <lib/print.h>
+#include <kernel/interrupt.h>
 
 
 /**

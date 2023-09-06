@@ -1,9 +1,10 @@
-#include "../Include/kernel/interrupt.h"
-#include "../Include/kernel/macro.h"
-#include "../Include/kernel/stdint.h"
+#include <kernel/interrupt.h>
+#include <kernel/macro.h>
+#include <kernel/stdint.h>
+#include <lib/print.h>
+#include <lib/io.h>
 
-#include "../Include/lib/print.h"
-#include "../Include/lib/io.h"
+
 // interrupt.s中定义的所有的中断入口函数地址数组
 extern Int_Handler_Typedef int_entry_table[IDT_DESC_NUM];
 

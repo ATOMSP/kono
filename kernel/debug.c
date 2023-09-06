@@ -1,6 +1,6 @@
-#include "../Include/kernel/debug.h"
-#include "../Include/lib/print.h"
-#include "../Include/kernel/interrupt.h"
+#include <kernel/debug.h>
+#include <lib/print.h>
+#include <kernel/interrupt.h>
 
 
 /**
@@ -8,7 +8,7 @@
 */
 void panic_spin(char* filename,int line,const char* func,const char* condition)
 {
-    Int_Disable(); //关闭中断，禁止调度
+    Int_Disable();  //关闭中断，禁止调度
     s_putstr("\n****Error****\n");
     s_putstr("filename:");s_putstr((const char*)filename);s_putchar('\n');
     s_putstr("line: 0x");s_putnum(line);s_putchar('\n');
