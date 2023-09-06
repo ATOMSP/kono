@@ -8,7 +8,6 @@ CC  = gcc-4.4
 LD  = ld
 # 构建参数宏定义
 ASLIB = -I Include/boot
-#CLIB = -I Include/kernel -I Include/lib
 CLIB = -I Include/
 ASFLAGS = -f elf# 汇编文件编译成elf格式
 CFLAGS = -Wall $(CLIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32

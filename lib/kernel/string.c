@@ -1,6 +1,6 @@
-#include "../../Include/lib/string.h"
-#include "../../Include/kernel/debug.h"
-#include "../../Include/kernel/stdint.h"
+#include <lib/string.h>
+#include <kernel/debug.h>
+#include <kernel/stdint.h>
 
 
 void memset(void* _dst,int val,size_t len)
