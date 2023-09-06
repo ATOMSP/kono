@@ -13,7 +13,9 @@
 			"interrupt.h": "c",
 			"io.h": "c",
 			"print.h": "c",
-			"string.h": "c"
+			"string.h": "c",
+			"bitmap.h": "c",
+			"mm.h": "c"
 		}
 	}
 }

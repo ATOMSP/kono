@@ -9,7 +9,6 @@
 int main()
 {
     init_dev();
-    s_putstr("Hello SSH!\n");
     Int_Enable();
     while (1);
     return 0;                                                                                                                
