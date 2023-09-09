@@ -13,12 +13,21 @@ extern "C"{
 //内核pool首地址
 #define KERNEL_HEAP_ADDR 0xc0100000
 
-
-struct virtual_memory_manager{
+/**
+ * 虚拟地址管理
+*/
+struct virtual_memory_manager
+{
   struct bitmap _map;
   size_t _addr;
 };
 
+struct pool
+{
+  struct bitmap pool_map;
+  size_t addr;
+  size_t capacity;
+};
 
 extern struct pool kernel_pool,user_pool;
 void init_mem(void);

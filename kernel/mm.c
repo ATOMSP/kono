@@ -3,15 +3,7 @@
 #include <lib/bitmap.h>
 
 
-
-struct pool
-{
-  struct bitmap pool_map;
-  size_t addr;
-  size_t capacity;
-};
-
-
+struct pool kernel_pool,user_pool;
 
 
 
