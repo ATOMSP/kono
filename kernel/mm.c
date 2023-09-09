@@ -7,7 +7,9 @@ struct pool kernel_pool,user_pool;
 
 
 
-
+/**
+ * 内存管理初始化
+*/
 void init_mem(void)
 {
 
