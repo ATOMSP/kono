@@ -28,6 +28,10 @@ enum Pool_Flag{
 #define PG_US_U   4//系统非系统属性
 #define PG_US_S   0
 
+//得到虚拟地址高10位
+#define PDE_IDX(addr)  ((addr & 0xffc00000) >> 22)
+//得到虚拟地址中间10位
+#define PTE_IDX(addr)  ((addr & 0x003ff000) >> 12)
 
 /**
  * 虚拟地址管理
@@ -54,7 +58,10 @@ extern struct pool kernel_pool,user_pool;
  * 初始化内存
 */
 void init_mem(void);
-
+/**
+ * 向内核空间申请pn个页内存
+*/
+void * get_kernel_pages(uint32_t pn);
 
 
 #ifdef __cplusplus
