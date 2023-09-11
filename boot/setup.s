@@ -238,6 +238,7 @@ create_pde:                            ; 创建页目录表项
     mov ecx,256
     mov esi,0
     mov edx,PG_RW_W | PG_US_U | PG_P
+    ; 下面是填充页表
 create_pte:
     mov [ebx+esi*4],edx
     inc esi

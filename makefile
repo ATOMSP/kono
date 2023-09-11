@@ -15,9 +15,8 @@ LDFLAGS = -Ttext $(C_ENTER_ADDR) -e main -Map $(BUILE_DIR)/kernel.map -m elf_i38
 ISDEBUG = -D NO_DEBUG # 是否打开debug
 
 # 内核目标文件: 添加c源文件时，需要修改
-OBJS = $(BUILE_DIR)/main.o $(BUILE_DIR)/init.o  $(BUILE_DIR)/string.o $(BUILE_DIR)/debug.o \
-	   $(BUILE_DIR)/interrupt.o  $(BUILE_DIR)/s_interrupt.o   $(BUILE_DIR)/print.o $
-
+OBJS = $(BUILE_DIR)/main.o $(BUILE_DIR)/init.o $(BUILE_DIR)/mm.o  $(BUILE_DIR)/bitmap.o $(BUILE_DIR)/string.o \
+       $(BUILE_DIR)/debug.o $(BUILE_DIR)/interrupt.o  $(BUILE_DIR)/s_interrupt.o  $(BUILE_DIR)/print.o 
 
 # 编译引导程序和启动代码
 boot:$(BUILE_DIR)/bootload.o $(BUILE_DIR)/setup.o
@@ -30,6 +29,10 @@ $(BUILE_DIR)/setup.o:boot/setup.s
 $(BUILE_DIR)/main.o:kernel/main.c
 	$(CC) $(CFLAGS) $(CLIB) -o $@ $<
 $(BUILE_DIR)/init.o:kernel/init.c
+	$(CC) $(CFLAGS) $(CLIB) -o $@ $<
+$(BUILE_DIR)/mm.o:kernel/mm.c
+	$(CC) $(CFLAGS) $(CLIB) -o $@ $<
+$(BUILE_DIR)/bitmap.o:lib/kernel/bitmap.c
 	$(CC) $(CFLAGS) $(CLIB) -o $@ $<
 $(BUILE_DIR)/interrupt.o:kernel/interrupt.c
 	$(CC) $(CFLAGS) $(CLIB) -o $@ $<

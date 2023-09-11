@@ -15,7 +15,8 @@
 			"print.h": "c",
 			"string.h": "c",
 			"bitmap.h": "c",
-			"mm.h": "c"
+			"mm.h": "c",
+			"debug.h": "c"
 		}
 	}
 }

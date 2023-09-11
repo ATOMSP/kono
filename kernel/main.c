@@ -9,7 +9,7 @@
 int main()
 {
     init_dev();
-    Int_Enable();
+    //Int_Disable();
     while (1);
     return 0;                                                                                                                
 }
