@@ -133,6 +133,7 @@ static size_t* getVaddrPdePtr(size_t vaddr)
 */
 static void* palloc(struct pool* m_pool)
 {
+  ASSERT(m_pool != NULL);
   //这里传进来的m_pool存在问题，貌似没影响后面
   int offset = Bitmap_scan(&(m_pool->pool_map),1);
   if(offset == -1){
