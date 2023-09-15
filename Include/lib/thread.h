@@ -42,8 +42,37 @@ struct intr_stack{
   uint32_t ss;
 };
 
+//线程栈thread_stack
+struct thread_stack{
+  uint32_t ebp;
+  uint32_t ebx;
+  uint32_t edi;
+  uint32_t esi;
+  /* 线程启动函数，多个线程时是代表转换后的函数入口 */
+  void (*eip)(thread_entry func,void * func_arg);
+  /* 提供同c语言一致的函数调用栈结构 */
+  void (*unused_retaddr);
+  thread_entry function;
+  void* func_arg;
+};
 
 
+/* 进程或线程的PCB */
+struct task_struct{
+  uint32_t * self_stack;
+  enum task_state status;
+  uint8_t priority;
+  char name[16];
+  uint32_t stack_magic;
+};
+
+/**
+ * 注册线程
+*/
+struct task_struct* thread_register(char* name,
+                                    int prio,
+                                    thread_entry function,
+                                    void* args);
 
 #ifdef __cplusplus
 }

@@ -4,17 +4,23 @@
 #include <kernel/mm.h>
 #include <lib/string.h>
 #include <lib/print.h>
+#include <lib/thread.h>
+
+
+void thread(void* args){
+    char *param = args;
+    while (1)
+    {
+        s_putstr(param);
+    }
+}
 
 
 int main()
 {
     init_dev();
     Int_Disable();
-    void* addr = get_kernel_pages(3);
-    s_putstr("\n get_kernel_pages start addr is 0x");
-    s_putnum((int)addr);
-    s_putchar('\n');
-    while (1);
+    thread_register("k_thread",31,thread,"Args");
     return 0;                                                                                                                
 }
 
