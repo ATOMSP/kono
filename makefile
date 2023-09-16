@@ -1,7 +1,7 @@
 # 路径宏定义
 BUILE_DIR = ./build
 C_ENTER_ADDR = 0xc0001500
-HD60M_PATH = ../../tool/bochs/hd60M.img
+HD60M_PATH = ../../tool/bochs-gdb/hd60M.img
 # 构建工具宏定义
 ASM = nasm
 CC  = gcc-4.4
@@ -9,8 +9,8 @@ LD  = ld
 # 构建参数宏定义
 ASLIB = -I Include/boot
 CLIB = -I Include/
-ASFLAGS = -f elf# 汇编文件编译成elf格式
-CFLAGS = -Wall $(CLIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32
+ASFLAGS = -f elf -g# 汇编文件编译成elf格式
+CFLAGS = -Wall $(CLIB) -c -fno-builtin -W -Wstrict-prototypes -Wmissing-prototypes -m32 -g
 LDFLAGS = -Ttext $(C_ENTER_ADDR) -e main -Map $(BUILE_DIR)/kernel.map -m elf_i386
 ISDEBUG = -D NO_DEBUG # 是否打开debug
 
@@ -53,7 +53,11 @@ $(BUILE_DIR)/kernel.bin:$(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 
-.PHONY: mk_dir hd clean build all boot
+.PHONY: mk_dir hd clean build all boot gdb_symbol
+
+gdb_symbol:
+	objcopy --only-keep-debug $(BUILE_DIR)/kernel.bin $(BUILE_DIR)/kernel.sym
+
 mk_dir: 
 	if [ ! -d $(BUILE_DIR) ];then mkdir $(BUILE_DIR);fi
 
@@ -68,7 +72,7 @@ clean:
 build: $(BUILE_DIR)/kernel.bin
 
 # 编译并下载镜像
-all: mk_dir boot build hd
+all: mk_dir boot build hd gdb_symbol
 
 
 
