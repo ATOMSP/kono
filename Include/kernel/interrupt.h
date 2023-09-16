@@ -7,6 +7,8 @@
 extern "C"{
 #endif
 
+#include <kernel/stdint.h>
+
 // 中断服务入口函数地址（类型为void*）
 typedef void* Int_Handler_Typedef;
 // 8259A端口

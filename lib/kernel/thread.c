@@ -15,7 +15,7 @@ struct list thread_ready_list;    // 就绪队列
 struct list thread_all_list;      // 任务队列
 static struct list_elem * thread_tag; //保存队列中的线程结点
 
-//外部实现任务切换函数
+//外部汇编实现任务切换函数
 extern void switch_to(struct task_struct * cur,struct task_struct * next);
 
 /**
@@ -117,7 +117,6 @@ static void make_main_thread(void)
   // main线程需要一直运行，故不需要加入就绪列表
   ASSERT(elem_find(&thread_all_list,&main_thread->all_list_tag) == 0);
   list_append(&thread_all_list,&main_thread->all_list_tag);
-
 }
 /**
  * 任务调度器
@@ -147,8 +146,6 @@ void schedule(void)
   next->status = TASK_RUNNING;
   switch_to(cur,next);
 }
-
-
 
 
 
