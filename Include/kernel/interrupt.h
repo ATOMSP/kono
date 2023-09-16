@@ -20,7 +20,10 @@ enum int_state{
     INT_OFF,
     INT_ON
 };
-
+/**
+ * 注册中断服务函数
+*/
+void intr_handle_register(uint8_t vec,Int_Handler_Typedef handler);
 /**
  * 中断初始化
 */

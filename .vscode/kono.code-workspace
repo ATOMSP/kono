@@ -16,7 +16,9 @@
 			"string.h": "c",
 			"bitmap.h": "c",
 			"mm.h": "c",
-			"debug.h": "c"
+			"debug.h": "c",
+			"thread.h": "c",
+			"list.h": "c"
 		}
 	}
 }

@@ -11,6 +11,7 @@ extern "C"{
 void s_putchar(uint8_t c);
 void s_putstr(const char* str);
 void s_putnum(int num);
+void setCursor(uint16_t pos);
 
 
 

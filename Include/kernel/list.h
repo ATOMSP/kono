@@ -9,10 +9,9 @@ extern "C"{
 #include <kernel/stdint.h>
 
 //得到结构体成员内部偏移量
-#define offset (struct_type, member) (int) ( & ( (struct_type*) 0) ->member) 
+#define offset(struct_type, member) ((int)(&((struct_type*)0)->member)) 
 //根据结构体成员获取结构体头指针
-#define elem2entry(struct_type, struct_member_name, elem_ptr) \ 
- (struct type*) ((int) elem_ptr - offset (struct_type, struct_member_name)) 
+#define elem2entry(struct_type, struct_member_name, elem_ptr) ((struct_type*)((int)elem_ptr - offset(struct_type, struct_member_name)))
 
 //双向链表前序指针和后序指针
 struct list_elem { 

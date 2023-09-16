@@ -1,6 +1,7 @@
 #include <kernel/interrupt.h>
 #include <kernel/macro.h>
 #include <kernel/stdint.h>
+#include <kernel/debug.h>
 #include <lib/print.h>
 #include <lib/io.h>
 
@@ -33,10 +34,27 @@ static void Int_general_callback(uint8_t vec)
     if(vec == 0x27 || vec == 0x2f){
         return;
     }
-    s_putstr("Interrupt Vector is:0x");
-    s_putnum(vec);
-    s_putchar('\n');
+    // 打印信息 设置光标位置 
+    setCursor(0);
+    int cnt = 320;
+    while (cnt--){
+        s_putchar(' ');
+    }
+    setCursor(0);
+    s_putstr("=========excetion messages show========\n");
+    setCursor(88);
+    s_putstr(IntAbnormal_name[vec]);//显示异常名称
+    if(vec == 14){
+        //缺页异常
+        int page_addr = 0;
+        asm volatile("movl %%cr2,%0":"=r"(page_addr));
+        s_putstr("\npage fault addr is");s_putnum(page_addr);
+    }
+    s_putstr("=========excetion messages show========\n");
+    while(1);
 }
+
+
 
 /**
  * 中断服务程序注册及名称注册（前20号）
@@ -119,6 +137,15 @@ static void init_pic(void)
     outb(PIC_M_DATA,0xfe);
     outb(PIC_S_DATA,0xff);    
     s_putstr("init pic OK!\n");
+}
+
+/**
+ * 注册中断服务函数
+*/
+void intr_handle_register(uint8_t vec,Int_Handler_Typedef handler)
+{
+    ASSERT(vec <= IDT_DESC_NUM);
+    Int_callback_table[vec] = handler;
 }
 
 /**

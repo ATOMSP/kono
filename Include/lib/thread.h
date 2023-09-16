@@ -6,7 +6,9 @@ extern "C"{
 #endif
 
 #include <kernel/stdint.h>
+#include <kernel/list.h>
 
+#define STACK_MAGIC 0x20020417
 //线程入口函数
 typedef void(*thread_entry)(void*);
 //线程状态
@@ -63,6 +65,13 @@ struct task_struct{
   enum task_state status;
   uint8_t priority;
   char name[16];
+  uint8_t ticks; // 线程单次运行时钟滴答数
+  uint32_t elapsed_ticks;//线程自首次运行后的累计滴答数
+
+  struct list_elem general_tag; //general_tag 的作用是用于线程在一般的队列中的结点
+  struct list_elem all_list_tag; //all list tag 的作用是用于线程队列 thread_all list 中的结点
+  uint32_t* pgdir; //线程所在页表虚拟地址 
+
   uint32_t stack_magic;
 };
 
@@ -73,6 +82,13 @@ struct task_struct* thread_register(char* name,
                                     int prio,
                                     thread_entry function,
                                     void* args);
+struct task_struct* get_cur_thread_pcb(void);
+
+/**
+ * 任务调度器
+*/
+void schedule(void);
+
 
 #ifdef __cplusplus
 }

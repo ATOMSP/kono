@@ -11,6 +11,7 @@ SECTION .text
 
 global s_putchar
 
+
 ; ---功能：打印单个字符（汇编实现）---
 ;   输入：单个字符（c语言调用）
 ; -------------------------------
@@ -180,6 +181,31 @@ put_each_char:
     jl  put_each_char
     popad
     ret
+; 设置光标位置
+global setCursor
+
+setCursor:
+    push eax
+    push edx
+    push ebx
+    mov bx,[esp + 16]
+    mov dx,0x03d4                   ; 设置高八位
+    mov al,0x0e
+    out dx,al
+    mov dx,0x03d5
+    mov al,bh
+    out dx,al
+
+    mov dx,0x03d4                   ; 设置低八位
+    mov al,0x0f
+    out dx,al
+    mov dx,0x03d5
+    mov al,bl
+    out dx,al  
+    pop ebx
+    pop edx
+    pop eax
+    ret 
 ; -------------------------------------------------数据区域----------------------------------------
 SECTION .data
     putnum_buff dq 0                ; 定义缓存
