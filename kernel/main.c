@@ -20,8 +20,14 @@ int main()
 
 void thread(void* args){
     char *param = args;
+    int i = 10;
     while (1)
     {
+        while (i--)
+        {
+            
+        }
+        i = 10;
         s_putstr(param);
     }
 }

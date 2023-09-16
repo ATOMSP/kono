@@ -70,9 +70,11 @@ clean:
 	@cd $(BUILE_DIR) && rm -f ./* && echo "remove build files ok!"
 
 build: $(BUILE_DIR)/kernel.bin
-
+# 编译后直接进入gdb调试
+run: 
+	gdb 
 # 编译并下载镜像
-all: mk_dir boot build hd gdb_symbol
+all: mk_dir boot build hd gdb_symbol run
 
 
 
