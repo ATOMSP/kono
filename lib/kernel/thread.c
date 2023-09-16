@@ -1,6 +1,8 @@
 #include <lib/thread.h>
 #include <kernel/mm.h>
 #include <lib/string.h>
+#include <lib/print.h>
+
 
 #define PG_SIZE 4096
 #define STACK_MAGIC 0x20020417
@@ -49,7 +51,6 @@ struct task_struct* thread_register(char* name,
   struct task_struct * thread = get_kernel_pages(1);
   init_thread(thread,name,prio);
   thread_create(thread,function,args);
-
   /* 准备好pcb，栈之后，开启kernel_thread */
   asm volatile("movl %0,%%esp;\
                 pop %%ebp;\

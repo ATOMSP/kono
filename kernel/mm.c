@@ -133,6 +133,7 @@ static size_t* getVaddrPdePtr(size_t vaddr)
 */
 static void* palloc(struct pool* m_pool)
 {
+  ASSERT(m_pool != NULL);
   //这里传进来的m_pool存在问题，貌似没影响后面
   int offset = Bitmap_scan(&(m_pool->pool_map),1);
   if(offset == -1){
@@ -224,6 +225,9 @@ void * get_kernel_pages(uint32_t pn)
   if(vaddr_start == NULL){
     return NULL;
   }
+  s_putstr("get vaddr is 0x");
+  s_putnum((uint32_t)vaddr_start);
+  s_putchar('\n');
   //将申请到的内存清零备用
   memset(vaddr_start,0,PAGE_SIZE * pn);
   return vaddr_start;

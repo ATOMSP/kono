@@ -6,6 +6,17 @@
 #include <lib/print.h>
 #include <lib/thread.h>
 
+void thread(void* args);
+
+int main()
+{
+    init_dev();
+    thread_register("k_thread",31,thread,"Args ");
+    while(1);
+    return 0;                                                                                                                
+}
+
+
 
 void thread(void* args){
     char *param = args;
@@ -14,17 +25,6 @@ void thread(void* args){
         s_putstr(param);
     }
 }
-
-
-int main()
-{
-    init_dev();
-    Int_Disable();
-    thread_register("k_thread",31,thread,"Args");
-    return 0;                                                                                                                
-}
-
-
 
 
 
