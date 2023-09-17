@@ -127,7 +127,6 @@ void schedule(void)
   ASSERT(Int_Get_State() == INT_OFF);
   //获取当前的线程pcb
   struct task_struct * cur = get_cur_thread_pcb();
-  ASSERT(cur->ticks == 0);
   //判断是否为时间片结束的调度
   if(cur->status == TASK_RUNNING){
     ASSERT(!elem_find(&thread_ready_list,&cur->general_tag));
@@ -159,6 +158,44 @@ void init_thread(void)
   s_putstr("init thread done\n");
 }
 
+
+/**
+ * 线程阻塞
+*/
+void thread_block(enum task_state state)
+{
+  ASSERT((state == TASK_BLOCKED) || (state == TASK_HANGING) || (state == TASK_WAITING));
+  //关中断
+  enum int_state old_state = Int_Disable();
+  struct task_struct * cur = get_cur_thread_pcb();
+  cur->status = state;
+  //换下线程
+  schedule();
+  //开启中断
+  Int_Set_State(old_state);
+}
+/**
+ * 线程唤醒
+*/
+void thread_unblock(struct task_struct * pthread)
+{
+  //关闭中断
+  enum int_state old_state = Int_Disable();
+  ASSERT(((pthread->status == TASK_BLOCKED)|| 
+          (pthread->status == TASK_WAITING)||
+          (pthread->status == TASK_HANGING))); 
+  if(pthread->status != TASK_READY){ 
+    /* 这两个判断目的相同，一个用于调试，另一个是因为不调试的时候这里的判断也得存在，防止意外情况 */
+    ASSERT(!elem_find (&thread_ready_list, &pthread->general_tag)); 
+    if(elem_find(&thread_ready_list, &pthread->general_tag)){
+      PANIC("thread_unblock: blocked thread ready_list\n"); 
+    }
+    list_push (&thread_ready_list, &pthread->general_tag); 
+    pthread->status = TASK_READY;  
+  } 
+  //开启中断
+  Int_Set_State(old_state);
+}
 
 
 

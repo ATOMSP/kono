@@ -82,17 +82,27 @@ struct task_struct* thread_register(char* name,
                                     int prio,
                                     thread_entry function,
                                     void* args);
+/**
+ * 获取当前线程pcb
+*/
 struct task_struct* get_cur_thread_pcb(void);
-
 /**
  * 任务调度器
 */
 void schedule(void);
-
 /**
  * 初始化线程，并启动主线程
 */
-void init_thread(void);
+void init_thread();
+/**
+ * 线程阻塞
+*/
+void thread_block(enum task_state state);
+/**
+ * 线程唤醒
+*/
+void thread_unblock(struct task_struct * pthread);
+
 
 #ifdef __cplusplus
 }

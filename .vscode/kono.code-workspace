@@ -18,7 +18,8 @@
 			"mm.h": "c",
 			"debug.h": "c",
 			"thread.h": "c",
-			"list.h": "c"
+			"list.h": "c",
+			"sync.h": "c"
 		}
 	}
 }

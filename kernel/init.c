@@ -3,7 +3,7 @@
 #include <kernel/mm.h>
 #include <kernel/timer.h>
 #include <lib/thread.h>
-
+#include <kernel/console.h>
 
 /**
  *  设备初始化
@@ -15,6 +15,7 @@ void init_dev(void)
     init_timer();/* 时钟初始化 */
     init_mem();/* 内存初始化 */
     init_thread();/*线程初始化 */
+    console_init();/* 终端初始化 */
 }
 
 
