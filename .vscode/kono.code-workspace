@@ -19,7 +19,9 @@
 			"debug.h": "c",
 			"thread.h": "c",
 			"list.h": "c",
-			"sync.h": "c"
+			"sync.h": "c",
+			"buff_queue.h": "c",
+			"keyboard.h": "c"
 		}
 	}
 }

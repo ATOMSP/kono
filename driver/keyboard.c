@@ -3,6 +3,7 @@
 #include <kernel/interrupt.h>
 #include <kernel/stdint.h>
 #include <lib/io.h>
+#include <driver/buff_queue.h>
 
 /* 键盘buffer register port */
 #define KED_BUF_PORT  0x60
@@ -44,7 +45,7 @@ static uint8_t caps_lock_status;
 static uint8_t ext_scancode;
 
 /* 以8042通码为索引的ascii二维数组 */
-static char keymap[][2] = {
+static const keymap[][2] = {
   {0,0},{esc,esc},{'1','!'},{'2','@'},{'3','#'},{'4','$'},{'5','%'},{'6','^'},{'7','&'},{'8','*'},
   {'9','('},{'0',')'},{'-','_'},{'=','+'},{backspace,backspace},{tab,tab},{'q','Q'},{'w','W'},{'e','E'},{'r','R'},
   {'t','T'},{'y','Y'},{'u','U'},{'i','I'},{'o','O'},{'p','P'},{'[','{'},{']','}'},{enter,enter},{ctrl_l_char,ctrl_l_char},
@@ -52,6 +53,11 @@ static char keymap[][2] = {
   {'\'','"'},{'`','~'},{shift_l_char,shift_l_char},{'\\','|'},{'z','Z'},{'x','X'},{'c','C'},{'v','V'},{'b','B'},{'n','N'},
   {'m','M'},{',','<'},{'.','>'},{'/','?'},{shift_r_char,shift_r_char},{'*','*'},{alt_l_char,alt_l_char},{' ',' '},{caps_lock_char,caps_lock_char}
 };
+
+/* 键盘缓存区 */
+struct buff_queue keyboard_buff;
+
+
 
 
 
@@ -119,7 +125,10 @@ static void intr_keyboard_handler(void)
     char c = keymap[index][shift];
     //只显示可显示字符，为0的就是不可显示字符
     if(c){
-      s_putchar(c);
+      if(buff_queue_full(&keyboard_buff) == 0){
+        //键盘获取的字符放入缓存区
+        buff_queue_putchar(&keyboard_buff,c);        
+      }
       return;
     }
     if(scancode == ctrl_l_make || scancode == ctrl_r_make){
@@ -145,6 +154,7 @@ static void intr_keyboard_handler(void)
 void keyboard_init(void)
 {
   s_putstr("init keyboard...\n");
+  buff_queue_init(&keyboard_buff);//键盘缓存区初始化
   intr_handle_register(0x21,intr_keyboard_handler);
   s_putstr("init keyboard done\n");
 }

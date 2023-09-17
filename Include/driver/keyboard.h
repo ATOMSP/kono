@@ -10,6 +10,12 @@ extern "C"{
 */
 void keyboard_init(void);
 
+
+/* 键盘缓存区 */
+extern struct buff_queue keyboard_buff;
+
+
+
 #ifdef __cplusplus
 }
 #endif

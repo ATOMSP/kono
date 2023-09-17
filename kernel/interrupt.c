@@ -133,8 +133,8 @@ static void init_pic(void)
     outb(PIC_S_DATA,0x28);
     outb(PIC_S_DATA,0x02);
     outb(PIC_S_DATA,0x01);
-    /* 打开主片IR0 目前只接受时钟的中断 */
-    outb(PIC_M_DATA,0xfd);//接受来自键盘的中断请求
+    /* 打开主片IR0 目前接受时钟的中断 */
+    outb(PIC_M_DATA,0xfc);//接受来自键盘的中断请求
     outb(PIC_S_DATA,0xff);    
     s_putstr("init pic OK!\n");
 }
