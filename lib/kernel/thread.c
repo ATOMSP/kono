@@ -54,7 +54,7 @@ void thread_create(struct task_struct * thread,thread_entry func,void* args){
 /**
  * 初始化线程PCB
 */
-void init_thread(struct task_struct * thread,char* name,int prio){
+void _init_thread(struct task_struct * thread,char* name,int prio){
   memset(thread,0,sizeof(*thread));
   strcpy(thread->name,name);
   //主线程需要一直运行
@@ -81,7 +81,7 @@ struct task_struct* thread_register(char* name,
                                     thread_entry function,
                                     void* args){
   struct task_struct * thread = get_kernel_pages(1);
-  init_thread(thread,name,prio);
+  _init_thread(thread,name,prio);
   thread_create(thread,function,args);
   /* 确保该任务之前不在队列 */
   ASSERT(elem_find(&thread_ready_list,&thread->general_tag) == 0);
@@ -113,7 +113,7 @@ static void make_main_thread(void)
   s_putstr("main thread pcb addr is 0x");
   s_putnum((uint32_t)main_thread);
   s_putchar('\n');
-  init_thread(main_thread,"main",31);
+  _init_thread(main_thread,"main",31);
   // main线程需要一直运行，故不需要加入就绪列表
   ASSERT(elem_find(&thread_all_list,&main_thread->all_list_tag) == 0);
   list_append(&thread_all_list,&main_thread->all_list_tag);
@@ -145,6 +145,18 @@ void schedule(void)
   struct task_struct * next = elem2entry(struct task_struct,general_tag,thread_tag);
   next->status = TASK_RUNNING;
   switch_to(cur,next);
+}
+
+/**
+ * 初始化线程，并启动主线程
+*/
+void init_thread(void)
+{
+  s_putstr("init thread ...\n");
+  list_init(&thread_all_list);
+  list_init(&thread_ready_list);
+  make_main_thread();
+  s_putstr("init thread done\n");
 }
 
 

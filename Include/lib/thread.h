@@ -89,6 +89,10 @@ struct task_struct* get_cur_thread_pcb(void);
 */
 void schedule(void);
 
+/**
+ * 初始化线程，并启动主线程
+*/
+void init_thread(void);
 
 #ifdef __cplusplus
 }

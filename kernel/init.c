@@ -2,6 +2,9 @@
 #include <kernel/interrupt.h>
 #include <kernel/mm.h>
 #include <kernel/timer.h>
+#include <lib/thread.h>
+
+
 /**
  *  设备初始化
 */
@@ -11,6 +14,7 @@ void init_dev(void)
     int_init(); /* 中断初始化 */
     init_timer();/* 时钟初始化 */
     init_mem();/* 内存初始化 */
+    init_thread();/*线程初始化 */
 }
 
 
