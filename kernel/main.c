@@ -16,11 +16,11 @@ int main()
     s_putstr("Welcome to Kernel!\n");
 
     init_dev();
-    thread_register("k_thread1",31,thread1,"Aais1");
-    thread_register("k_thread2",8,thread2,"Aais2");
+    //thread_register("k_thread1",31,thread1,"Aais1");
+    //thread_register("k_thread2",8,thread2,"Aais2");
     Int_Enable();
     while(1){
-        console_put_str("Main");
+        //console_put_str("Main");
     }   
     return 0;                                                                                                                
 }
