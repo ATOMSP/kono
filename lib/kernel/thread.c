@@ -40,8 +40,8 @@ static void kernel_thread(thread_entry func,void* arg){
  * 初始化栈内环境结构
 */
 void thread_create(struct task_struct * thread,thread_entry func,void* args){
-  thread->self_stack -= sizeof(struct intr_stack);
-  thread->self_stack -= sizeof(struct thread_stack);
+  thread->self_stack = (uint32_t*)((int)thread->self_stack - sizeof(struct intr_stack));
+  thread->self_stack = (uint32_t*)((int)thread->self_stack - sizeof(struct thread_stack));
   struct thread_stack * kthread_stack = (struct thread_stack*)thread->self_stack;
   kthread_stack->func_arg = args;
   kthread_stack->function = func;

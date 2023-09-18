@@ -13,7 +13,11 @@
 void thread1(void* args);
 void thread2(void* args);
 
-int main()
+
+/**
+ * main函数入口
+*/
+int main(void)
 {
     setCursor(0);
     s_putstr("Welcome to Kernel!\n");
@@ -31,26 +35,14 @@ int main()
 void thread1(void* args){
     while (1)
     {
-        enum int_state old_state = Int_Disable();
-        if(!buff_queue_empty(&keyboard_buff)){
-          console_put_str((char*)args);
-          char byte = buff_queue_getchar(&keyboard_buff);
-          console_put_char(byte);           
-        }
-        Int_Set_State(old_state);
+        console_put_str((char*)args);
     }
 }
 
 void thread2(void* args){
     while (1)
     {
-        enum int_state old_state = Int_Disable();
-        if(!buff_queue_empty(&keyboard_buff)){
-          console_put_str((char*)args);
-          char byte = buff_queue_getchar(&keyboard_buff);
-          console_put_char(byte);           
-        }
-        Int_Set_State(old_state);
+        console_put_str((char*)args);
     }
 }
 
