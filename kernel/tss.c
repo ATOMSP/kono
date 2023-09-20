@@ -1,7 +1,9 @@
 #include <kernel/stdint.h>
 #include <kernel/macro.h>
 #include <lib/thread.h>
-
+#include <lib/print.h>
+#include <lib/string.h>
+#include <kernel/tss.h>
 
 
 #define PG_SIZE  4096
@@ -60,11 +62,38 @@ static struct gdt_desc make_gdt_desc(
   struct gdt_desc desc;
   desc.limit_low_word = limit & 0x0000ffff;
   desc.base_low_word = desc_base & 0x0000ffff;
-  desc.base_mid_byte = ((desc_base & 0x00ff0000));
-
+  desc.base_mid_byte = ((desc_base & 0x00ff0000) >> 16);
+  desc.attr_low_byte = (uint8_t)attr_low;
+  desc.limit_high_attr_high = (((limit & 0x000f0000) >> 16) + 
+  (uint8_t)(attr_high));
+  desc.base_high_byte = desc_base >> 24;
+  return desc;
 }
 
+/**
+ * 在GDT中创建tss并重新加载GDT
+*/
+void tss_init(void)
+{
+  s_putstr("tss init...\n");
+  uint32_t tss_size = sizeof(tss);
+  memset(&tss,0,tss_size);
+  tss.ss0 = SELECTOR_K_STACK;
+  tss.io_base = tss_size;
+  *((struct gdt_desc*)0xc0000923) = make_gdt_desc((uint32_t*)&tss,
+  tss_size - 1,TSS_ATTR_LOW,TSS_ATTR_HIGH);
+  /* 加入了用户代码数据段 */
+  *((struct gdt_desc*)0xc000092B) = make_gdt_desc((uint32_t*)0,
+  0xfffff,GDT_CODE_ATTR_LOW_DPL3,TSS_ATTR_HIGH);
+  *((struct gdt_desc*)0xc0000933) = make_gdt_desc((uint32_t*)0,
+  0xfffff,GDT_DATA_ATTR_LOW_DPL3,TSS_ATTR_HIGH);
+  /* 重装gdtr */
+  uint64_t gdt_operand = ((8 * 7 - 1) | ((uint64_t)(uint32_t)0xc0000903 << 16));
+  asm volatile("lgdt %0"::"m"(gdt_operand));
+  asm volatile("ltr %w0"::"r"(SELECTOR_TSS));
+  s_putstr("tss_init and ltr done done\n");
 
+}
 
 
 
